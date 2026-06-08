@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hype — Зарабатывай, рекомендуя топ-бренды</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:'Inter',-apple-system,sans-serif;
+      background:#0a0a0f;
+      color:#fff;
+      line-height:1.6;
+      overflow-x:hidden;
+    }
+
+    .noise{
+      position:fixed;top:0;left:0;width:100%;height:100%;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none;z-index:0;
+    }
+
+    .container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+    nav{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:20px 24px;max-width:1200px;margin:0 auto;
+    }
+    .logo{font-size:28px;font-weight:900;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1px}
+    .nav-links{display:flex;gap:24px;align-items:center}
+    .nav-links a{color:#94a3b8;text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
+    .nav-links a:hover{color:#fff}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 24px;border-radius:12px;font-weight:600;font-size:14px;
+      border:none;cursor:pointer;text-decoration:none;transition:all .2s;
+    }
+    .btn-primary{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(168,85,247,.4)}
+    .btn-outline{border:1px solid rgba(255,255,255,.15);color:#fff;background:transparent}
+    .btn-outline:hover{border-color:#a855f7;background:rgba(168,85,247,.1)}
+    .btn-lg{padding:14px 36px;font-size:16px;border-radius:14px}
+
+    .hero{
+      min-height:90vh;display:flex;align-items:center;
+      position:relative;overflow:hidden;
+    }
+    .hero::before{
+      content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
+      background:radial-gradient(circle at 30% 50%,rgba(168,85,247,.08) 0%,transparent 50%),
+                 radial-gradient(circle at 70% 50%,rgba(236,72,153,.08) 0%,transparent 50%);
+      animation:glow 8s ease-in-out infinite alternate;
+    }
+    @keyframes glow{
+      0%{transform:translate(0,0)}
+      100%{transform:translate(-5%,5%)}
+    }
+    .hero-content{max-width:800px;margin:0 auto;text-align:center}
+    .hero-tag{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 16px;border-radius:100px;
+      background:rgba(168,85,247,.15);color:#a855f7;font-size:13px;font-weight:600;
+      margin-bottom:24px;border:1px solid rgba(168,85,247,.25);
+    }
+    .hero h1{
+      font-size:clamp(48px,8vw,80px);font-weight:900;line-height:1.1;
+      background:linear-gradient(135deg,#fff 30%,#a855f7 60%,#ec4899);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+      margin-bottom:20px;
+    }
+    .hero p{
+      font-size:clamp(16px,2vw,20px);color:#94a3b8;max-width:600px;margin:0 auto 36px;
+    }
+    .hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+    .hero-stats{
+      display:flex;gap:48px;justify-content:center;margin-top:64px;
+    }
+    .hero-stat{text-align:center}
+    .hero-stat .num{font-size:32px;font-weight:800;color:#fff}
+    .hero-stat .label{font-size:14px;color:#64748b;margin-top:4px}
+
+    section{padding:100px 0}
+    .section-label{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 14px;border-radius:100px;
+      background:rgba(168,85,247,.1);color:#a855f7;font-size:12px;font-weight:600;
+      margin-bottom:16px;text-transform:uppercase;letter-spacing:.5px;
+    }
+    .section-title{
+      font-size:clamp(32px,5vw,48px);font-weight:800;margin-bottom:16px;
+      background:linear-gradient(135deg,#fff,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .section-desc{color:#64748b;font-size:16px;max-width:600px;margin-bottom:48px}
+
+    .offers-grid{
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;
+    }
+    .offer-card{
+      padding:28px;border-radius:16px;
+      background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+      transition:all .3s;cursor:pointer;
+    }
+    .offer-card:hover{transform:translateY(-4px);border-color:rgba(168,85,247,.3);box-shadow:0 12px 40px rgba(168,85,247,.15)}
+    .offer-icon{font-size:40px;margin-bottom:16px}
+    .offer-card h3{font-size:18px;font-weight:700;margin-bottom:8px}
+    .offer-card p{color:#94a3b8;font-size:14px;margin-bottom:16px}
+    .offer-tags{display:flex;gap:8px;flex-wrap:wrap}
+    .offer-tag{padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600}
+    .offer-tag.rate{background:rgba(34,211,238,.15);color:#22d3ee}
+    .offer-tag.action{background:rgba(168,85,247,.15);color:#a855f7}
+
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:24px}
+    .step{
+      padding:28px;border-radius:16px;text-align:center;
+      background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .step-num{
+      width:40px;height:40px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,#a855f7,#ec4899);font-weight:800;font-size:16px;margin-bottom:16px;
+    }
+    .step h3{font-size:16px;font-weight:700;margin-bottom:8px}
+    .step p{color:#64748b;font-size:14px}
+
+    .cta-section{
+      text-align:center;padding:80px 0;
+      background:linear-gradient(135deg,rgba(168,85,247,.05),rgba(236,72,153,.05));
+      border-top:1px solid rgba(255,255,255,.05);
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+
+    .promo-highlight{
+      padding:60px;border-radius:24px;text-align:center;
+      background:linear-gradient(135deg,rgba(168,85,247,.1),rgba(236,72,153,.05));
+      border:1px solid rgba(168,85,247,.2);
+    }
+    .promo-code{
+      display:inline-block;padding:16px 40px;border-radius:12px;
+      background:rgba(0,0,0,.3);border:1px dashed rgba(168,85,247,.4);
+      font-size:28px;font-weight:800;letter-spacing:4px;
+      color:#fff;margin:16px 0;
+    }
+
+    footer{
+      padding:40px 0;border-top:1px solid rgba(255,255,255,.05);
+      text-align:center;color:#475569;font-size:14px;
+    }
+
+    @media(max-width:768px){
+      .hero-stats{flex-direction:column;gap:24px}
+      .nav-links{display:none}
+      .promo-highlight{padding:30px}
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+
+  <nav>
+    <div class="logo">HYPE</div>
+    <div class="nav-links">
+      <a href="#about">Как это работает</a>
+      <a href="#offers">Офферы</a>
+      <a href="#promo">Промокоды</a>
+      <a href="#calc">Доход</a>
+      <a href="/dashboard.html" class="btn btn-primary">Войти</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-tag">⚡ Зарабатывай с топ-брендами</div>
+        <h1>Рекомендуй продукты и зарабатывай</h1>
+        <p>Получи промокод и получай повышенные выплаты до 80% от рекламного бюджета. Делись промокодом — каждый по нему получает такие же условия.</p>
+        <div class="hero-actions">
+          <a href="/dashboard.html" class="btn btn-primary btn-lg">Зарегистрироваться →</a>
+          <a href="#about" class="btn btn-outline btn-lg">Как это работает</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num">50+</div><div class="label">офферов</div></div>
+          <div class="hero-stat"><div class="num">до 80%</div><div class="label">твой доход</div></div>
+          <div class="hero-stat"><div class="num">моментально</div><div class="label">выплаты на счёт</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="container">
+      <div class="section-label">Как это работает</div>
+      <h2 class="section-title">Начни зарабатывать в 4 шага</h2>
+      <p class="section-desc">Просто зарегистрируйся, получи промокод и делись ссылками на лучшие предложения — доход начисляется автоматически.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Получи промокод</h3>
+          <p>Зарегистрируйся и получи уникальный промокод. Он открывает повышенные выплаты до 80% и доступ к офферам.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Выбери оффер</h3>
+          <p>Из каталога: Яндекс Маркет, Совкомбанк, билеты и другие. Каждый оффер имеет ставку за действие — покупку, заявку, регистрацию.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Делись ссылкой</h3>
+          <p>Публикуй свою персональную ссылку где угодно: соцсети, YouTube, Telegram, сайт, блог. Чем больше людей перейдут — тем больше заработаешь.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h3>Получай доход</h3>
+          <p>Пользователь совершает действие — тебе начисляется до 80% от ставки. Автоматически, без задержек. Выводи в любое время.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="offers" style="background:linear-gradient(180deg,rgba(168,85,247,.02),transparent)">
+    <div class="container">
+      <div class="section-label">Офферы</div>
+      <h2 class="section-title">Что можно продвигать</h2>
+      <p class="section-desc">Топовые бренды уже на платформе. Выбирай оффер и зарабатывай на каждом действии пользователя.</p>
+
+      <div class="offers-grid">
+        <div class="offer-card">
+          <div class="offer-icon">🛍️</div>
+          <h3>Wildberries / Ozon</h3>
+          <p>Покупка любого товара с маркетплейса по твоей ссылке — до 34% комиссии</p>
+          <div class="offer-tags">
+            <span class="offer-tag rate">до 34% с продажи</span>
+            <span class="offer-tag action">покупка</span>
+          </div>
+        </div>
+        <div class="offer-card">
+          <div class="offer-icon">💳</div>
+          <h3>Халва (Совкомбанк)</h3>
+          <p>Оформление карты рассрочки Халва — до 3000₽ за одобренную заявку</p>
+          <div class="offer-tags">
+            <span class="offer-tag rate">до 3 000₽ / действие</span>
+            <span class="offer-tag action">заявка</span>
+          </div>
+        </div>
+        <div class="offer-card">
+          <div class="offer-icon">🏪</div>
+          <h3>Яндекс Маркет</h3>
+          <p>Приведи нового продавца на Яндекс Маркет — 15 000₽ за каждого</p>
+          <div class="offer-tags">
+            <span class="offer-tag rate">15 000₽ / продавец</span>
+            <span class="offer-tag action">реферал</span>
+          </div>
+        </div>
+        <div class="offer-card">
+          <div class="offer-icon">✈️</div>
+          <h3>Aviasales</h3>
+          <p>Покупка авиабилетов по твоей ссылке</p>
+          <div class="offer-tags">
+            <span class="offer-tag rate">до 5% с продажи</span>
+            <span class="offer-tag action">покупка</span>
+          </div>
+        </div>
+        <div class="offer-card">
+          <div class="offer-icon">🎓</div>
+          <h3>Skillbox</h3>
+          <p>Оплата курса по программированию, дизайну, маркетингу</p>
+          <div class="offer-tags">
+            <span class="offer-tag rate">до 15 000₽ / курс</span>
+            <span class="offer-tag action">оплата</span>
+          </div>
+        </div>
+        <div class="offer-card">
+          <div class="offer-icon">🏦</div>
+          <h3>Тинькофф Банк</h3>
+          <p>Заявка на кредитную или дебетовую карту</p>
+          <div class="offer-tags">
+            <span class="offer-tag rate">до 3 000₽ / действие</span>
+            <span class="offer-tag action">заявка</span>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="promo">
+    <div class="container">
+      <div class="section-label">Промокоды</div>
+      <h2 class="section-title">Как получить повышенные выплаты?</h2>
+      <p class="section-desc">Зарегистрируйся по промокоду и получай до 80% от рекламного бюджета. Своим промокодом ты открываешь такие же условия другим.</p>
+
+      <div class="promo-highlight">
+        <div style="font-size:16px;color:#94a3b8;margin-bottom:12px">Нет промокода?</div>
+        <div style="font-size:18px;font-weight:600;margin-bottom:16px">Введите в поиске: <span style="color:#a855f7;font-weight:700">hype-XXXX-2026</span></div>
+        <div style="color:#64748b;font-size:14px;margin-bottom:12px">Возьмите любой промокод из результатов — все они дают повышенные выплаты до 80%</div>
+        <div style="font-size:14px;color:#64748b">
+          Уже есть промокод? Введите его при регистрации
+        </div>
+        <div style="margin-top:24px">
+          <a href="/dashboard.html" class="btn btn-primary btn-lg">Зарегистрироваться</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="calc" style="background:linear-gradient(180deg,transparent,rgba(168,85,247,.02))">
+    <div class="container">
+      <div class="section-label">Доход</div>
+      <h2 class="section-title">Сколько ты заработаешь</h2>
+      <p class="section-desc">Прозрачная система: до 80% от каждого действия — твои. Остальное — работа платформы и партнёрская сеть.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;margin-top:24px">
+        <div style="padding:32px;border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);text-align:center">
+          <div style="font-size:14px;color:#64748b;margin-bottom:12px">Wildberries / Ozon</div>
+          <div style="font-size:36px;font-weight:800;color:#22d3ee">до 34%</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:8px">с продажи</div>
+        </div>
+        <div style="padding:32px;border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);text-align:center">
+          <div style="font-size:14px;color:#64748b;margin-bottom:12px">Халва / Тинькофф</div>
+          <div style="font-size:36px;font-weight:800;color:#22d3ee">до 2 400₽</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:8px">за заявку</div>
+        </div>
+        <div style="padding:32px;border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);text-align:center">
+          <div style="font-size:14px;color:#64748b;margin-bottom:12px">Яндекс Маркет</div>
+          <div style="font-size:36px;font-weight:800;color:#22d3ee">15 000₽</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:8px">за продавца</div>
+        </div>
+      </div>
+
+      <div style="margin-top:40px;padding:28px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06)">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;justify-content:center">
+          <span style="font-size:14px;color:#64748b">Ты получаешь</span>
+          <span style="font-size:24px;font-weight:800;color:#22d3ee">до 80%</span>
+          <span style="font-size:14px;color:#64748b">от каждого действия</span>
+          <span style="color:#334155">|</span>
+          <span style="font-size:14px;color:#64748b">Выплаты на счёт сразу после расчёта рекламодателя</span>
+          <span style="color:#334155">|</span>
+          <span style="font-size:14px;color:#64748b">Без лимитов</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container">
+      <div class="section-label">Начни сейчас</div>
+      <h2 class="section-title">Готов зарабатывать?</h2>
+      <p style="color:#94a3b8;max-width:500px;margin:0 auto 32px;font-size:16px">
+        Зарегистрируйся, получи промокод и начни зарабатывать на рекомендациях топ-брендов. Это бесплатно.
+      </p>
+      <a href="/dashboard.html" class="btn btn-primary btn-lg">Зарегистрироваться →</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div style="margin-bottom:16px"><span class="logo" style="font-size:20px">HYPE</span></div>
+      <div>Рекомендуй бренды и зарабатывай © 2026</div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"
+    import { getAuth } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCldhgeyLXZilZ4D9m6W9yUG2ZrE_GBfNY",
+      authDomain: "hype-marketplace-1.firebaseapp.com",
+      projectId: "hype-marketplace-1",
+      storageBucket: "hype-marketplace-1.firebasestorage.app",
+      appId: "1:855895718151:web:29cf80689042d3de14eda2"
+    }
+
+    const app = initializeApp(firebaseConfig)
+    const auth = getAuth(app)
+
+    console.log('🔥 Hype connected')
+  </script>
+</body>
+</html>

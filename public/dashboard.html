@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hype — Дашборд</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:'Inter',-apple-system,sans-serif;
+      background:#0a0a0f;color:#fff;line-height:1.6;
+      min-height:100vh;
+    }
+
+    /* Auth screen */
+    .auth-screen{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:radial-gradient(circle at 50% 50%,rgba(168,85,247,.06),transparent 70%);
+    }
+    .auth-box{
+      width:400px;max-width:94%;padding:40px;border-radius:20px;
+      background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .auth-box .logo{text-align:center;font-size:28px;font-weight:900;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+    .auth-box h2{text-align:center;font-size:20px;margin-bottom:4px}
+    .auth-box .sub{text-align:center;color:#64748b;font-size:14px;margin-bottom:28px}
+    .input-group{margin-bottom:16px}
+    .input-group label{display:block;font-size:13px;color:#94a3b8;margin-bottom:6px;font-weight:500}
+    .input-group input{
+      width:100%;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,.1);
+      background:rgba(0,0,0,.3);color:#fff;font-size:15px;outline:none;transition:border .2s;
+    }
+    .input-group input:focus{border-color:#a855f7}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:12px 24px;border-radius:10px;font-weight:600;font-size:14px;
+      border:none;cursor:pointer;text-decoration:none;transition:all .2s;width:100%;
+    }
+    .btn-primary{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff}
+    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(168,85,247,.3)}
+    .btn-outline{background:transparent;border:1px solid rgba(255,255,255,.15);color:#fff}
+    .btn-outline:hover{border-color:#a855f7}
+    .auth-switch{text-align:center;margin-top:16px;font-size:13px;color:#64748b}
+    .auth-switch a{color:#a855f7;text-decoration:none;cursor:pointer}
+    .auth-switch a:hover{text-decoration:underline}
+    .error-msg{color:#ef4444;font-size:13px;text-align:center;margin-bottom:12px;display:none}
+    .promo-input{display:none}
+
+    /* Dashboard */
+    .dash{display:none}
+    .dash-header{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.06);max-width:1200px;margin:0 auto;
+    }
+    .dash-header .logo{font-size:22px;font-weight:900;background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .dash-user{display:flex;align-items:center;gap:12px;font-size:14px;color:#94a3b8}
+    .dash-user .avatar{
+      width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#ec4899);
+      display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;
+    }
+    .dash-user .logout-btn{
+      padding:6px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);
+      background:transparent;color:#94a3b8;font-size:12px;cursor:pointer;transition:all .2s;
+    }
+    .dash-user .logout-btn:hover{border-color:#ef4444;color:#ef4444}
+
+    .dash-body{
+      max-width:1200px;margin:0 auto;padding:32px 24px;
+      display:grid;grid-template-columns:220px 1fr;gap:32px;
+    }
+
+    /* Sidebar */
+    .sidebar{display:flex;flex-direction:column;gap:4px}
+    .sidebar a{
+      padding:10px 16px;border-radius:10px;font-size:14px;font-weight:500;
+      color:#64748b;text-decoration:none;transition:all .2s;cursor:pointer;
+      display:flex;align-items:center;gap:10px;
+    }
+    .sidebar a:hover{background:rgba(255,255,255,.04);color:#fff}
+    .sidebar a.active{background:rgba(168,85,247,.12);color:#a855f7}
+    .sidebar a .icon{font-size:18px;width:24px;text-align:center}
+
+    /* Content */
+    .content{}
+    .page{display:none}
+    .page.active{display:block}
+
+    .page h2{font-size:24px;font-weight:700;margin-bottom:4px}
+    .page .page-desc{color:#64748b;font-size:14px;margin-bottom:28px}
+
+    /* Stats cards */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+    .stat-card{
+      padding:20px;border-radius:12px;
+      background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .stat-card .value{font-size:28px;font-weight:800;color:#fff}
+    .stat-card .label{font-size:13px;color:#64748b;margin-top:4px}
+
+    /* Offers table */
+    .table-wrap{
+      border-radius:12px;overflow:hidden;
+      border:1px solid rgba(255,255,255,.08);
+    }
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:14px 18px;text-align:left;font-size:14px}
+    th{background:rgba(255,255,255,.03);color:#94a3b8;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.3px}
+    td{border-top:1px solid rgba(255,255,255,.04);color:#cbd5e1}
+    .badge{
+      display:inline-flex;padding:2px 10px;border-radius:6px;font-size:12px;font-weight:600;
+    }
+    .badge.green{background:rgba(34,211,238,.15);color:#22d3ee}
+    .badge.yellow{background:rgba(234,179,8,.15);color:#eab308}
+    .badge.purple{background:rgba(168,85,247,.15);color:#a855f7}
+
+    .action-btn{
+      padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;
+      border:none;cursor:pointer;transition:all .2s;
+    }
+    .action-btn.primary{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff}
+    .action-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(168,85,247,.3)}
+    .action-btn.outline{background:transparent;border:1px solid rgba(255,255,255,.15);color:#94a3b8}
+    .action-btn.outline:hover{border-color:#a855f7;color:#fff}
+
+    .empty-state{text-align:center;padding:60px 20px;color:#64748b}
+    .empty-state .icon{font-size:48px;margin-bottom:16px}
+    .empty-state p{font-size:14px}
+
+    .promo-display{
+      display:inline-block;padding:8px 16px;border-radius:8px;
+      background:rgba(0,0,0,.3);border:1px dashed rgba(168,85,247,.3);
+      font-size:14px;font-weight:700;letter-spacing:1px;color:#fff;
+    }
+
+    .conversion-feed{display:flex;flex-direction:column;gap:8px}
+    .conv-item{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 16px;border-radius:10px;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+      font-size:14px;
+    }
+    .conv-item .offer-name{color:#fff;font-weight:500}
+    .conv-item .amount{color:#22d3ee;font-weight:700}
+    .conv-item .date{color:#475569;font-size:12px}
+
+    .sim-btn{
+      margin-top:16px;padding:8px 20px;border-radius:8px;
+      background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.25);
+      color:#a855f7;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;
+    }
+    .sim-btn:hover{background:rgba(168,85,247,.25)}
+
+    @media(max-width:768px){
+      .dash-body{grid-template-columns:1fr}
+      .sidebar{flex-direction:row;overflow-x:auto;padding-bottom:8px}
+      .sidebar a{white-space:nowrap;font-size:13px;padding:8px 14px}
+      .stats-grid{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Auth Screen -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-box">
+    <div class="logo">HYPE</div>
+    <h2 id="authTitle">Вход в Hype</h2>
+    <div class="sub" id="authSub">Войди, чтобы начать зарабатывать</div>
+    <div class="error-msg" id="errorMsg"></div>
+    <form id="authForm">
+      <div class="input-group promo-input" id="promoGroup">
+        <label>Промокод (если есть)</label>
+        <input type="text" id="promoInput" placeholder="HYPE-XXXXXXXX">
+      </div>
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" id="emailInput" placeholder="email@example.com" required>
+      </div>
+      <div class="input-group">
+        <label>Пароль</label>
+        <input type="password" id="passInput" placeholder="минимум 6 символов" required minlength="6">
+      </div>
+      <button type="submit" class="btn btn-primary" id="authBtn">Войти</button>
+    </form>
+    <div class="auth-switch">
+      <span id="switchText">Нет аккаунта?</span>
+      <a id="switchLink">Зарегистрироваться</a>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div class="dash" id="dashScreen">
+  <div class="dash-header">
+    <div class="logo">HYPE</div>
+    <div class="dash-user">
+      <span id="userEmail">user@email.com</span>
+      <div class="avatar" id="userAvatar">U</div>
+      <button class="logout-btn" onclick="logout()">Выйти</button>
+    </div>
+  </div>
+
+  <div class="dash-body">
+    <nav class="sidebar">
+      <a class="active" data-page="overview"><span class="icon">📊</span>Обзор</a>
+      <a data-page="offers"><span class="icon">🛍️</span>Офферы</a>
+      <a data-page="promocodes"><span class="icon">🔗</span>Промокоды</a>
+      <a data-page="conversions"><span class="icon">⚡</span>Конверсии</a>
+      <a data-page="withdraw"><span class="icon">💰</span>Вывод средств</a>
+    </nav>
+
+    <div class="content">
+      <!-- Overview -->
+      <div class="page active" id="page-overview">
+        <h2>Обзор</h2>
+        <div class="page-desc">Твоя статистика за всё время</div>
+        <div class="stats-grid" id="statsGrid">
+          <div class="stat-card"><div class="value" id="totalEarned">0₽</div><div class="label">Всего заработано</div></div>
+          <div class="stat-card"><div class="value" id="monthEarned">0₽</div><div class="label">За месяц</div></div>
+          <div class="stat-card"><div class="value" id="totalConvs">0</div><div class="label">Конверсий</div></div>
+          <div class="stat-card"><div class="value" id="promoCount">0</div><div class="label">Промокодов</div></div>
+        </div>
+
+        <h3 style="font-size:16px;font-weight:600;margin-bottom:16px">Последние конверсии</h3>
+        <div class="conversion-feed" id="recentConvs">
+          <div class="empty-state"><p>Пока нет конверсий. Выбери оффер и делись ссылкой!</p></div>
+        </div>
+      </div>
+
+      <!-- Offers -->
+      <div class="page" id="page-offers">
+        <h2>Офферы</h2>
+        <div class="page-desc">Выбирай оффер и получай ссылку для продвижения</div>
+        <div class="offers-list" id="offersList"></div>
+      </div>
+
+      <!-- Promocodes -->
+      <div class="page" id="page-promocodes">
+        <h2>Мои промокоды</h2>
+        <div class="page-desc">Твои уникальные промокоды для регистрации новых участников</div>
+        <div class="table-wrap"><table><thead><tr><th>Промокод</th><th>Статус</th><th>Активаций</th><th>Заработано</th><th></th></tr></thead><tbody id="promoTable"></tbody></table></div>
+        <div style="margin-top:16px"><button class="action-btn primary" onclick="generatePromo()">+ Создать промокод</button></div>
+      </div>
+
+      <!-- Conversions -->
+      <div class="page" id="page-conversions">
+        <h2>Конверсии</h2>
+        <div class="page-desc">История всех действий пользователей по твоим ссылкам</div>
+        <div class="table-wrap"><table><thead><tr><th>Оффер</th><th>Действие</th><th>Сумма</th><th>Статус</th><th>Дата</th></tr></thead><tbody id="convTable"></tbody></table></div>
+        <button class="sim-btn" onclick="simulateConversion()">🎲 Симулировать конверсию (демо)</button>
+      </div>
+
+      <!-- Withdraw -->
+      <div class="page" id="page-withdraw">
+        <h2>Вывод средств</h2>
+        <div class="page-desc">Доступно к выводу: <strong id="withdrawBalance">0₽</strong></div>
+        <div style="padding:32px;border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);text-align:center;max-width:400px">
+          <div style="font-size:14px;color:#64748b;margin-bottom:12px">Сумма вывода</div>
+          <div style="display:flex;gap:12px;align-items:center;justify-content:center">
+            <input type="number" id="withdrawAmount" placeholder="5000" style="width:120px;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.3);color:#fff;font-size:16px;text-align:center">
+            <button class="action-btn primary" onclick="alert('Заявка на вывод отправлена! (демо)')">Вывести</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js"
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js"
+  import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js"
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCldhgeyLXZilZ4D9m6W9yUG2ZrE_GBfNY",
+    authDomain: "hype-marketplace-1.firebaseapp.com",
+    projectId: "hype-marketplace-1",
+    storageBucket: "hype-marketplace-1.firebasestorage.app",
+    appId: "1:855895718151:web:29cf80689042d3de14eda2"
+  }
+
+  const app = initializeApp(firebaseConfig)
+  const auth = getAuth(app)
+  const db = getFirestore(app)
+
+  // DOM refs
+  const authScreen = document.getElementById('authScreen')
+  const dashScreen = document.getElementById('dashScreen')
+  const authForm = document.getElementById('authForm')
+  const authTitle = document.getElementById('authTitle')
+  const authSub = document.getElementById('authSub')
+  const authBtn = document.getElementById('authBtn')
+  const switchLink = document.getElementById('switchLink')
+  const switchText = document.getElementById('switchText')
+  const errorMsg = document.getElementById('errorMsg')
+  const promoGroup = document.getElementById('promoGroup')
+  const promoInput = document.getElementById('promoInput')
+  const emailInput = document.getElementById('emailInput')
+  const passInput = document.getElementById('passInput')
+  const userEmail = document.getElementById('userEmail')
+  const userAvatar = document.getElementById('userAvatar')
+
+  let isRegister = false
+
+  // Mock data — реальные CPA-офферы
+  const OFFERS = [
+    { id: 'wb', name: 'Wildberries / Ozon', action: 'Покупка товара', rate: 5000, icon: '🛍️' },
+    { id: 'hl', name: 'Халва (Совкомбанк)', action: 'Заявка на карту', rate: 3000, icon: '💳' },
+    { id: 'ym', name: 'Яндекс Маркет', action: 'Реферал продавца', rate: 15000, icon: '🏪' },
+    { id: 'av', name: 'Aviasales', action: 'Покупка билета', rate: 500, icon: '✈️' },
+    { id: 'sk', name: 'Skillbox', action: 'Оплата курса', rate: 15000, icon: '🎓' },
+    { id: 'tb', name: 'Тинькофф Банк', action: 'Заявка на карту', rate: 3000, icon: '🏦' },
+  ]
+
+  // Mock state (per user session, stored in memory)
+  let userData = null
+  let promocodes = []
+  let conversions = []
+  let earnings = 0
+
+  function loadUserData(uid) {
+    const saved = localStorage.getItem(`hype_${uid}`)
+    if (saved) {
+      const data = JSON.parse(saved)
+      promocodes = data.promocodes || []
+      conversions = data.conversions || []
+      earnings = data.earnings || 0
+    }
+    renderDashboard()
+  }
+
+  function saveUserData(uid) {
+    localStorage.setItem(`hype_${uid}`, JSON.stringify({ promocodes, conversions, earnings }))
+  }
+
+  // Auth UI
+  switchLink.addEventListener('click', () => {
+    isRegister = !isRegister
+    if (isRegister) {
+      authTitle.textContent = 'Регистрация'
+      authSub.textContent = 'Введи промокод и начни зарабатывать'
+      authBtn.textContent = 'Зарегистрироваться'
+      switchText.textContent = 'Уже есть аккаунт?'
+      switchLink.textContent = 'Войти'
+      promoGroup.style.display = 'block'
+      promoInput.required = true
+      promoInput.placeholder = 'HYPE-XXXXXXXX (обязательно)'
+    } else {
+      authTitle.textContent = 'Вход в Hype'
+      authSub.textContent = 'Войди, чтобы начать зарабатывать'
+      authBtn.textContent = 'Войти'
+      switchText.textContent = 'Нет аккаунта?'
+      switchLink.textContent = 'Зарегистрироваться'
+      promoGroup.style.display = 'none'
+      promoInput.required = false
+    }
+    errorMsg.style.display = 'none'
+  })
+
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    errorMsg.style.display = 'none'
+    const email = emailInput.value
+    const pass = passInput.value
+    const promo = promoInput.value.trim()
+
+    try {
+      if (isRegister) {
+        await createUserWithEmailAndPassword(auth, email, pass)
+        if (promo) {
+          localStorage.setItem(`hype_promo_${auth.currentUser.uid}`, promo)
+        }
+      } else {
+        await signInWithEmailAndPassword(auth, email, pass)
+      }
+    } catch (err) {
+      errorMsg.textContent = err.message
+      errorMsg.style.display = 'block'
+    }
+  })
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      authScreen.style.display = 'none'
+      dashScreen.style.display = 'block'
+      userEmail.textContent = user.email
+      userAvatar.textContent = user.email[0].toUpperCase()
+      loadUserData(user.uid)
+
+      // Check if user had a promo code
+      const savedPromo = localStorage.getItem(`hype_promo_${user.uid}`)
+      if (savedPromo && promocodes.length === 0) {
+        promocodes.push({ code: savedPromo, status: 'active', activations: 0, earned: 0 })
+        saveUserData(user.uid)
+        renderDashboard()
+      }
+    } else {
+      authScreen.style.display = 'flex'
+      dashScreen.style.display = 'none'
+    }
+  })
+
+  window.logout = () => signOut(auth)
+
+  // Navigation
+  document.querySelectorAll('.sidebar a').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault()
+      document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'))
+      el.classList.add('active')
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+      document.getElementById(`page-${el.dataset.page}`).classList.add('active')
+    })
+  })
+
+  // Render
+  function renderDashboard() {
+    const totalConvs = conversions.length
+    const totalEarned = conversions.reduce((s, c) => s + c.amount, 0)
+    const monthEarned = conversions
+      .filter(c => new Date(c.date) > new Date(Date.now() - 30*86400000))
+      .reduce((s, c) => s + c.amount, 0)
+
+    document.getElementById('totalEarned').textContent = `${totalEarned.toLocaleString()}₽`
+    document.getElementById('monthEarned').textContent = `${monthEarned.toLocaleString()}₽`
+    document.getElementById('totalConvs').textContent = totalConvs
+    document.getElementById('promoCount').textContent = promocodes.length
+    document.getElementById('withdrawBalance').textContent = `${totalEarned.toLocaleString()}₽`
+
+    // Recent conversions
+    const recentEl = document.getElementById('recentConvs')
+    if (conversions.length === 0) {
+      recentEl.innerHTML = '<div class="empty-state"><p>Пока нет конверсий. Выбери оффер и делись ссылкой!</p></div>'
+    } else {
+      recentEl.innerHTML = conversions.slice(-5).reverse().map(c => `
+        <div class="conv-item">
+          <span class="offer-name">${c.icon} ${c.offer}</span>
+          <span class="amount">+${c.amount}₽</span>
+          <span class="date">${new Date(c.date).toLocaleDateString()}</span>
+        </div>
+      `).join('')
+    }
+
+    // Offers
+    const offersEl = document.getElementById('offersList')
+    offersEl.innerHTML = OFFERS.map(o => `
+      <div class="stat-card" style="margin-bottom:12px;cursor:pointer" onclick="copyLink('${o.id}')">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:16px;font-weight:600">${o.icon} ${o.name}</div>
+            <div style="font-size:13px;color:#64748b;margin-top:4px">${o.action}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:20px;font-weight:800;color:#22d3ee">${o.rate}₽</div>
+            <div style="font-size:12px;color:#64748b">за действие</div>
+          </div>
+        </div>
+        <div style="margin-top:12px"><button class="action-btn primary" onclick="event.stopPropagation();copyLink('${o.id}')">📋 Копировать ссылку</button></div>
+      </div>
+    `).join('')
+
+    // Promocodes table
+    const promoEl = document.getElementById('promoTable')
+    if (promocodes.length === 0) {
+      promoEl.innerHTML = '<tr><td colspan="5"><div class="empty-state" style="padding:30px"><p>Нет промокодов. Создай первый!</p></div></td></tr>'
+    } else {
+      promoEl.innerHTML = promocodes.map((p, i) => `
+        <tr>
+          <td><span class="promo-display">${p.code}</span></td>
+          <td><span class="badge ${p.status === 'active' ? 'green' : 'yellow'}">${p.status === 'active' ? 'Активен' : 'Неактивен'}</span></td>
+          <td>${p.activations}</td>
+          <td>${p.earned}₽</td>
+          <td><button class="action-btn outline" onclick="copyText('${p.code}')">Копировать</button></td>
+        </tr>
+      `).join('')
+    }
+
+    // Conversions table
+    const convEl = document.getElementById('convTable')
+    if (conversions.length === 0) {
+      convEl.innerHTML = '<tr><td colspan="5"><div class="empty-state" style="padding:30px"><p>Конверсий пока нет</p></div></td></tr>'
+    } else {
+      convEl.innerHTML = conversions.slice().reverse().map(c => `
+        <tr>
+          <td>${c.icon} ${c.offer}</td>
+          <td>${c.action}</td>
+          <td style="color:#22d3ee;font-weight:600">+${c.amount}₽</td>
+          <td><span class="badge green">Оплачено</span></td>
+          <td>${new Date(c.date).toLocaleDateString()}</td>
+        </tr>
+      `).join('')
+    }
+  }
+
+  window.copyLink = (offerId) => {
+    const offer = OFFERS.find(o => o.id === offerId)
+    const link = `https://hype.promo/${offerId}/${auth.currentUser?.uid || 'demo'}`
+    navigator.clipboard.writeText(link).then(() => {
+      alert(`Ссылка на "${offer.name}" скопирована!\n${link}`)
+    })
+  }
+
+  window.copyText = (text) => {
+    navigator.clipboard.writeText(text).then(() => alert('Промокод скопирован!'))
+  }
+
+  window.generatePromo = () => {
+    const code = `HYPE-${Math.random().toString(36).substr(2,8).toUpperCase()}`
+    promocodes.push({ code, status: 'active', activations: 0, earned: 0 })
+    saveUserData(auth.currentUser.uid)
+    renderDashboard()
+  }
+
+  window.simulateConversion = () => {
+    const offer = OFFERS[Math.floor(Math.random() * OFFERS.length)]
+    const amount = Math.round(offer.rate * (0.7 + Math.random() * 0.2))
+    conversions.push({
+      offer: offer.name,
+      icon: offer.icon,
+      action: offer.action,
+      amount,
+      date: new Date().toISOString()
+    })
+    earnings += amount
+    saveUserData(auth.currentUser.uid)
+    renderDashboard()
+  }
+</script>
+</body>
+</html>
